@@ -95,20 +95,21 @@
         {
             string user = txtUsername.Text.Trim();
             string pass = txtPassword.Text;
+            this.DialogResult = DialogResult.OK;
 
-            // TODO: thay bằng kiểm tra database, API…
-            if (user == "admin" && pass == "123")
-            {
-                // Trả về OK để Program.cs biết đăng nhập thành công
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            else
-            {
-                MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Giữ form mở, DialogResult vẫn là None
-            }
+            //// TODO: thay bằng kiểm tra database, API…
+            //if (user == "admin" && pass == "123")
+            //{
+            //    // Trả về OK để Program.cs biết đăng nhập thành công
+            //    this.DialogResult = DialogResult.OK;
+            //    this.Close();
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
+            //                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    // Giữ form mở, DialogResult vẫn là None
+            //}
         }
 
         // Canh giữa cho Round Panel - nơi chứa chỗ đăng nhập 

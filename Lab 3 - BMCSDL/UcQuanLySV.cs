@@ -35,7 +35,7 @@ namespace Lab_3___BMCSDL
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
                 FlowDirection = FlowDirection.TopDown,
-                WrapContents = false
+                WrapContents = false,
             };
 
             this.Controls.Add(flowPanel);
@@ -67,7 +67,7 @@ namespace Lab_3___BMCSDL
                         GroupBox groupBox = new GroupBox
                         {
                             Text = $"Lớp: {tenlop} ({malop})",
-                            Width = 900,
+                            Width = 1170,
                             Height = 300,
                             Font = new Font("Segoe UI", 10, FontStyle.Bold),
                             AutoSize = true,
@@ -90,7 +90,6 @@ namespace Lab_3___BMCSDL
                         Panel panelContent = new Panel
                         {
                             Dock = DockStyle.Bottom,
-                            Height = 220,
                             Visible = false // Ban đầu ẩn
                         };
 
@@ -113,7 +112,30 @@ namespace Lab_3___BMCSDL
                         {
                             panelContent.Visible = !panelContent.Visible;
                             toggleButton.Text = panelContent.Visible ? "▲" : "▼";
-                            groupBox.Height = panelContent.Visible ? 300 : 60;
+
+                            if (panelContent.Visible)
+                            {
+                                // Tính toán chiều cao vừa đủ cho nội dung
+                                int rowHeight = dgv.RowTemplate.Height; // chiều cao trung bình mỗi dòng
+                                int rowCount = dgv.Rows.Count;
+
+                                // Tính tổng chiều cao thực tế: dòng + header + padding
+                                int dgvHeight = (rowHeight * rowCount) + dgv.ColumnHeadersHeight + 10;
+
+                                // Nếu có scrollbar, cộng thêm một chút
+                                if (dgv.DisplayedRowCount(false) < dgv.RowCount)
+                                {
+                                    dgvHeight += SystemInformation.HorizontalScrollBarHeight;
+                                }
+
+                                // Cập nhật chiều cao cho panelContent và groupBox
+                                panelContent.Height = dgvHeight;
+                                groupBox.Height = panelContent.Height + 60; // 60 là phần header + margin GroupBox
+                            }
+                            else
+                            {
+                                groupBox.Height = 60;
+                            }
                         };
 
                         // Load sinh viên của lớp này
