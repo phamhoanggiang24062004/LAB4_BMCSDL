@@ -25,13 +25,13 @@ namespace Lab_3___BMCSDL
 
         private void InitializeGrid()
         {
-            this.Dock = DockStyle.Fill;
+            this.Dock = DockStyle.Fill;             // Phủ hết phần content 
             this.BackColor = Color.White;
 
             Panel containerPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(0, 0, 30, 0), // Tạo khoảng cách phải
+                Padding = new Padding(0, 0, 50, 0), // Tạo khoảng cách phải
                 BackColor = Color.White
             };
 

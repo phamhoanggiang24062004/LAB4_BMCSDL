@@ -55,7 +55,7 @@ namespace Lab_3___BMCSDL
 
         private void InitializeComponent_Dashboard()
         {
-            // Kích thước cố định của form
+            // Kích thước cố định của form - Window
             this.Text = "Dashboard";
             this.ClientSize = new Size(1500, 1000);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -130,11 +130,9 @@ namespace Lab_3___BMCSDL
             int sidebarWidth = btnWidth + 20;  // đệm 10px trái + 10px phải
 
             // Tính chiều cao vừa đủ cho 4 nút
-            int sidebarHeight = marginTop
-                              + btnCount * btnHeight
-                              + (btnCount - 1) * btnSpacing
-                              + marginBottom;
+            int sidebarHeight = marginTop + btnCount * btnHeight + (btnCount - 1) * btnSpacing + marginBottom;
 
+            // Tạo sidebar panel
             sidebarPanel = new Panel
             {
                 BackColor = primaryColor,
@@ -166,7 +164,7 @@ namespace Lab_3___BMCSDL
             int contentX = sidebarPanel.Right + horizontalGap;
             int contentY = sidebarY;
             int contentWidth = this.ClientSize.Width - contentX;
-            int contentHeight = sidebarHeight;
+            int contentHeight = 900 - headerPanel.Height - verticalGap;
 
             contentPanel = new Panel
             {
@@ -177,6 +175,7 @@ namespace Lab_3___BMCSDL
             this.Controls.Add(contentPanel);
         }
 
+        // Tạo nút sidebar
         private Button CreateSidebarButton(string text, int x, int y)
         {
             Color primaryColor = Color.FromArgb(0x2D, 0x8C, 0xFF);
@@ -195,6 +194,7 @@ namespace Lab_3___BMCSDL
             return btn;
         }
 
+        // Hiển thị nội dung mới
         private void ShowContent(UserControl control)
         {
             // Xóa nội dung cũ

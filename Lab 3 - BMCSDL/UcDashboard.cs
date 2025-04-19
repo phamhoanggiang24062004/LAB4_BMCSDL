@@ -29,7 +29,9 @@ namespace Lab_3___BMCSDL
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 BackColor = Color.White,
                 Padding = new Padding(10),
-                Anchor = AnchorStyles.None
+                Anchor = AnchorStyles.Top, // Căn trên (và giữa ngang)
+                Margin = new Padding(0),
+                Dock = DockStyle.None
             };
 
             // Tiêu đề
@@ -46,10 +48,10 @@ namespace Lab_3___BMCSDL
 
             // Danh sách thành viên
             string[] thanhVien = {
-                "MSSV 22120074 - Đỗ Nhật Duy",
-                "MSSV 221200** - Đỗ Văn Hải",
-                "MSSV 22120084 - Phạm Hoàng Giang"
-            };
+        "MSSV 22120074 - Đỗ Nhật Duy",
+        "MSSV 221200** - Đỗ Văn Hải",
+        "MSSV 22120084 - Phạm Hoàng Giang"
+    };
 
             foreach (var tv in thanhVien)
             {
@@ -65,21 +67,29 @@ namespace Lab_3___BMCSDL
                 centerPanel.Controls.Add(lbl);
             }
 
-            // TableLayoutPanel để căn giữa trong toàn bộ contentPanel
+            // TableLayoutPanel với 3 hàng: [trên - auto], [giữa - auto], [dưới - fill]
             TableLayoutPanel wrapper = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 1,
+                ColumnCount = 3,
+                RowCount = 3,
                 BackColor = Color.White
             };
-            wrapper.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            wrapper.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            wrapper.Controls.Add(centerPanel, 0, 0);
 
-            // Căn giữa
-            wrapper.Controls[0].Anchor = AnchorStyles.None;
+            // Cột giữa chiếm 100%, 2 cột ngoài giữ để căn giữa ngang
+            wrapper.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            wrapper.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            wrapper.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
 
+            // Hàng trên cùng chiếm ít, hàng giữa chứa nội dung, hàng dưới chiếm phần còn lại
+            wrapper.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F)); // Khoảng cách từ trên xuống
+            wrapper.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            wrapper.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // phần còn lại
+
+            // Thêm panel vào giữa (hàng 1, cột 1)
+            wrapper.Controls.Add(centerPanel, 1, 1);
+
+            // Thêm wrapper vào control
             this.Controls.Add(wrapper);
         }
     }
