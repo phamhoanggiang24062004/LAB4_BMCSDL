@@ -1,0 +1,129 @@
+﻿namespace Lab_3___BMCSDL
+{
+    public partial class Form1 : Form
+    {
+        private RoundedPanel panelLogin;
+        private TextBox txtUsername;
+        private TextBox txtPassword;
+        private Button btnLogin;
+
+        public Form1()
+        {
+            InitializeComponent();
+            InitializeLoginForm();
+
+            // Đăng ký sự kiện Resize cho Form
+            this.Resize += MainForm_Resize;
+        }
+
+        private void InitializeLoginForm()
+        {
+            //--- Thiết lập Form ---
+            this.Text = "Đăng nhập";
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.ClientSize = new Size(800, 600);
+            // Background sẽ thêm sau, ví dụ:
+            this.BackgroundImage = Image.FromFile("C:\\Users\\PC\\Downloads\\microsoft-windows-3840x2160-12507.jpg");
+            this.BackgroundImageLayout = ImageLayout.Stretch;
+
+            //--- Tạo Panel bo góc chứa phần login ---
+            panelLogin = new RoundedPanel
+            {
+                CornerRadius = 20,
+                BorderColor = Color.LightBlue,
+                BorderThickness = 2,
+                BackColor = Color.FromArgb(240, 248, 255), // màu nền nhạt
+                Size = new Size(400, 230),
+            };
+
+            // Canh giữa panelLogin
+            panelLogin.Location = new Point(
+                (this.ClientSize.Width - panelLogin.Width) / 2,
+                (this.ClientSize.Height - panelLogin.Height) / 2
+            );
+
+            this.Controls.Add(panelLogin);
+
+            //--- Label và TextBox Tên đăng nhập ---
+            Label lblUser = new Label
+            {
+                Text = "Tên đăng nhập:",
+                AutoSize = true,
+                Location = new Point(20, 20)
+            };
+            panelLogin.Controls.Add(lblUser);
+
+            txtUsername = new TextBox
+            {
+                Size = new Size(360, 25),
+                Location = new Point(20, 45)
+                // Nếu bạn dùng .NET 6+, có thể thêm: PlaceholderText = "Nhập tên đăng nhập"
+            };
+            panelLogin.Controls.Add(txtUsername);
+
+            //--- Label và TextBox Mật khẩu ---
+            Label lblPass = new Label
+            {
+                Text = "Mật khẩu:",
+                AutoSize = true,
+                Location = new Point(20, 80)
+            };
+            panelLogin.Controls.Add(lblPass);
+
+            txtPassword = new TextBox
+            {
+                Size = new Size(360, 25),
+                Location = new Point(20, 105),
+                UseSystemPasswordChar = true
+                // Nếu .NET cũ không hỗ trợ PlaceholderText, bạn có thể tự custom watermark
+            };
+            panelLogin.Controls.Add(txtPassword);
+
+            //--- Nút Đăng nhập ---
+            btnLogin = new Button
+            {
+                Text = "Đăng nhập",
+                Size = new Size(100, 30),
+                Location = new Point((panelLogin.Width - 100) / 2, 160)
+            };
+            btnLogin.Click += BtnLogin_Click;
+            panelLogin.Controls.Add(btnLogin);
+        }
+
+        // Xác thực đăng nhập 
+        private void BtnLogin_Click(object sender, EventArgs e)
+        {
+            string user = txtUsername.Text.Trim();
+            string pass = txtPassword.Text;
+
+            // TODO: thay bằng kiểm tra database, API…
+            if (user == "admin" && pass == "123")
+            {
+                // Trả về OK để Program.cs biết đăng nhập thành công
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Giữ form mở, DialogResult vẫn là None
+            }
+        }
+
+        // Canh giữa cho Round Panel - nơi chứa chỗ đăng nhập 
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            // Tính tọa độ mới để panelLogin luôn ở giữa Form
+            int newX = (this.ClientSize.Width - panelLogin.Width) / 2;
+            int newY = (this.ClientSize.Height - panelLogin.Height) / 2;
+
+            panelLogin.Location = new Point(newX, newY);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
