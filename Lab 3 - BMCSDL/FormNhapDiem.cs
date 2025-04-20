@@ -15,13 +15,16 @@ namespace Lab_3___BMCSDL
     {
         private string malop;
         private string tenlop;
+        private string mahp;
         private string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
+        private Button btnLuuDiem;
 
-        public FormNhapDiem(string malop, string tenlop)
+        public FormNhapDiem(string malop, string tenlop, string mahp)
         {
             InitializeComponent();
             this.malop = malop;
             this.tenlop = tenlop;
+            this.mahp = mahp;
 
             this.Text = $"Nhập điểm cho lớp: {tenlop} ({malop})";
             InitializeGrid();
@@ -40,6 +43,17 @@ namespace Lab_3___BMCSDL
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false
             };
+
+            btnLuuDiem = new Button
+            {
+                Text = "Lưu điểm",
+                Dock = DockStyle.Bottom,
+                Height = 40,
+                BackColor = Color.LightGreen
+            };
+            btnLuuDiem.Click += BtnLuuDiem_Click;
+
+            this.Controls.Add(btnLuuDiem);
             this.Controls.Add(dgv);
         }
 
@@ -72,5 +86,55 @@ namespace Lab_3___BMCSDL
                 dgv.Columns["DIEM"].HeaderText = "Điểm";
             }
         }
+
+        private void BtnLuuDiem_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                foreach (DataGridViewRow row in dgv.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    string masv = row.Cells["MASV"].Value.ToString();
+                    object diemObj = row.Cells["DIEM"].Value;
+
+                    if (diemObj == DBNull.Value || diemObj == null) continue;
+
+                    double diem;
+                    if (!double.TryParse(diemObj.ToString(), out diem)) continue;
+
+                    // Kiểm tra đã có điểm chưa
+                    string checkQuery = "SELECT COUNT(*) FROM BANGDIEM WHERE MASV = @MASV AND MAHP = @MAHP";
+                    SqlCommand checkCmd = new SqlCommand(checkQuery, conn);
+                    checkCmd.Parameters.AddWithValue("@MASV", masv);
+                    checkCmd.Parameters.AddWithValue("@MAHP", mahp);
+                    int count = (int)checkCmd.ExecuteScalar();
+
+                    string query;
+                    if (count > 0)
+                    {
+                        // Cập nhật điểm
+                        query = "UPDATE BANGDIEM SET DIEMTHI = @DIEMTHI WHERE MASV = @MASV AND MAHP = @MAHP";
+                    }
+                    else
+                    {
+                        // Chèn điểm mới
+                        query = "INSERT INTO BANGDIEM (MASV, MAHP, DIEMTHI) VALUES (@MASV, @MAHP, @DIEMTHI)";
+                    }
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@MASV", masv);
+                    cmd.Parameters.AddWithValue("@MAHP", mahp);
+                    cmd.Parameters.AddWithValue("@DIEMTHI", diem);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                MessageBox.Show("Lưu điểm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
     }
 }

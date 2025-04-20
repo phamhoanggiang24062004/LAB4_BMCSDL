@@ -106,10 +106,43 @@ namespace Lab_3___BMCSDL
                 string malop = row.Cells["MALOP"].Value.ToString();
                 string tenlop = row.Cells["TENLOP"].Value.ToString();
 
-                FormNhapDiem frm = new FormNhapDiem(malop, tenlop);
+                string mahp = GetMAHP_From_TENLOP(tenlop);
+                if (string.IsNullOrEmpty(mahp))
+                {
+                    MessageBox.Show("Không tìm thấy học phần phù hợp với lớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                FormNhapDiem frm = new FormNhapDiem(malop, tenlop, mahp);
                 frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.ShowDialog(); // dùng ShowDialog để buộc người dùng nhập xong mới quay về
             }
         }
+
+        private string GetMAHP_From_TENLOP(string tenlop)
+        {
+            string mahp = null;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // Tách tên học phần ra khỏi tên lớp (giả sử sau dấu '-')
+                string tenHP_Guess = tenlop.Contains("-") ? tenlop.Split('-')[1].Trim() : tenlop.Trim();
+
+                string query = "SELECT MAHP FROM HOCPHAN WHERE TENHP LIKE @TENHP";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@TENHP", "%" + tenHP_Guess + "%");
+
+                object result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    mahp = result.ToString();
+                }
+            }
+
+            return mahp;
+        }
+
     }
 }
