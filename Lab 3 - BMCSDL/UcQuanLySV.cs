@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Security.Cryptography;
+
 
 namespace Lab_3___BMCSDL
 {
@@ -96,14 +98,29 @@ namespace Lab_3___BMCSDL
                         // Tạo DataGridView và add vào GroupBox
                         DataGridView dgv = new DataGridView
                         {
-                            Dock = DockStyle.Fill,
+                            Dock = DockStyle.Top,
                             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                             AllowUserToAddRows = false,
                             AllowUserToDeleteRows = false,
                             ReadOnly = false
                         };
 
+                        Button btnCapNhat = new Button
+                        {
+                            Text = "Cập nhật thông tin",
+                            Width = 150,
+                            Height = 35,
+                            BackColor = Color.LightBlue,
+                            Font = new Font("Segoe UI", 9),
+                            Visible = false // Ẩn ban đầu
+                        };
+                        btnCapNhat.Location = new Point(20, 10); // vị trí tạm, sẽ chỉnh lại bên dưới
+
+                        // Gắn sự kiện gọi hàm cập nhật
+                        btnCapNhat.Click += (s, e) => CapNhatDuLieuSinhVien(malop, dgv);
+
                         panelContent.Controls.Add(dgv);
+                        panelContent.Controls.Add(btnCapNhat);
                         groupBox.Controls.Add(panelContent);
                         flowPanel.Controls.Add(groupBox);
 
@@ -112,6 +129,7 @@ namespace Lab_3___BMCSDL
                         {
                             panelContent.Visible = !panelContent.Visible;
                             toggleButton.Text = panelContent.Visible ? "▲" : "▼";
+                            btnCapNhat.Visible = panelContent.Visible;
 
                             if (panelContent.Visible)
                             {
@@ -129,7 +147,10 @@ namespace Lab_3___BMCSDL
                                 }
 
                                 // Cập nhật chiều cao cho panelContent và groupBox
-                                panelContent.Height = dgvHeight;
+                                dgv.Height = dgvHeight;
+                                btnCapNhat.Top = dgv.Bottom + 10; // đặt nút dưới bảng
+                                panelContent.Height = dgvHeight + btnCapNhat.Height + 20;
+
                                 groupBox.Height = panelContent.Height + 60; // 60 là phần header + margin GroupBox
                             }
                             else
@@ -151,7 +172,7 @@ namespace Lab_3___BMCSDL
 
         private void LoadSinhVienForLop(string malop, DataGridView dgv, SqlConnection conn)
         {
-            string querySV = @"SELECT MASV, HOTEN, NGAYSINH, DIACHI FROM SINHVIEN WHERE MALOP = @MALOP";
+            string querySV = @"SELECT MASV, HOTEN, NGAYSINH, DIACHI, TENDN, MATKHAU FROM SINHVIEN WHERE MALOP = @MALOP";
             SqlCommand cmd = new SqlCommand(querySV, conn);
             cmd.Parameters.AddWithValue("@MALOP", malop);
 
@@ -159,10 +180,99 @@ namespace Lab_3___BMCSDL
             DataTable dt = new DataTable();
             adapter.Fill(dt);
 
+            dt.Columns.Add("NEW_PASSWORD", typeof(string)); // thêm cột giả cho password được mã hóa 
             dgv.DataSource = dt;
 
             // Cấu hình cho phép sửa các cột phù hợp
             dgv.Columns["MASV"].ReadOnly = true; // không cho sửa mã sinh viên
+            // Ẩn cột mật khẩu
+            if (dgv.Columns.Contains("MATKHAU"))
+            {
+                dgv.Columns["MATKHAU"].Visible = false;
+            }
+        }
+
+        public static byte[] HashPassword(string password)
+        {
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashBytes = sha1.ComputeHash(inputBytes);
+                return hashBytes;
+            }
+        }
+
+        private void CapNhatDuLieuSinhVien(string malop, DataGridView dgv)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                foreach (DataGridViewRow row in dgv.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    string masv = row.Cells["MASV"].Value?.ToString();
+                    string hoten = row.Cells["HOTEN"].Value?.ToString();
+                    string diachi = row.Cells["DIACHI"].Value?.ToString();
+                    string tendangnhap = row.Cells["TENDN"].Value?.ToString();
+
+                    // Lấy ngày sinh
+                    object ngaysinhObj = row.Cells["NGAYSINH"].Value;
+                    DateTime? ngaysinh = null;
+                    if (ngaysinhObj != null && DateTime.TryParse(ngaysinhObj.ToString(), out DateTime parsed))
+                    {
+                        ngaysinh = parsed;
+                    }
+
+                    // Lấy mật khẩu mới nếu có
+                    string newPassword = row.Cells["NEW_PASSWORD"].Value?.ToString();
+                    byte[] finalPassword = (byte[])row.Cells["MATKHAU"].Value;
+
+                    if (!string.IsNullOrEmpty(newPassword))
+                    {
+                        finalPassword = HashPassword(newPassword);
+                    }
+
+                    try
+                    {
+                        // Kiểm tra các trường bắt buộc
+                        if (string.IsNullOrWhiteSpace(masv) || string.IsNullOrWhiteSpace(hoten) ||
+                            string.IsNullOrWhiteSpace(tendangnhap) || finalPassword == null)
+                        {
+                            MessageBox.Show($"Thiếu thông tin bắt buộc ở sinh viên có mã: {masv}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            continue;
+                        }
+
+                        using (SqlCommand updateCmd = new SqlCommand(@"
+                        UPDATE SINHVIEN 
+                        SET HOTEN = @HOTEN, NGAYSINH = @NGAYSINH, DIACHI = @DIACHI,
+                            TENDN = @TENDN, MATKHAU = @MATKHAU, MALOP = @MALOP
+                        WHERE MASV = @MASV", conn))
+                        {
+                            updateCmd.Parameters.AddWithValue("@MASV", masv);
+                            updateCmd.Parameters.AddWithValue("@HOTEN", hoten ?? (object)DBNull.Value);
+                            updateCmd.Parameters.AddWithValue("@NGAYSINH", ngaysinh ?? (object)DBNull.Value);
+                            updateCmd.Parameters.AddWithValue("@DIACHI", diachi ?? (object)DBNull.Value);
+                            updateCmd.Parameters.AddWithValue("@MALOP", malop ?? (object)DBNull.Value);
+                            updateCmd.Parameters.AddWithValue("@TENDN", tendangnhap ?? (object)DBNull.Value);
+                            updateCmd.Parameters.AddWithValue("@MATKHAU", finalPassword ?? (object)DBNull.Value);
+
+                            updateCmd.ExecuteNonQuery();
+                        }
+
+                        // Xóa dữ liệu cột NEW_PASSWORD để tránh cập nhật lại
+                        row.Cells["NEW_PASSWORD"].Value = null;
+
+                        MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Lỗi cập nhật sinh viên {masv}: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
+            }
         }
     }
 }
