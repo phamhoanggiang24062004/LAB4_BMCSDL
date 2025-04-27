@@ -14,12 +14,13 @@ namespace Lab_3___BMCSDL
     public partial class UcNhapDiem : UserControl
     {
         string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
-        private string currentMANV = "NV01";  // lấy từ đăng nhập thực tế
+        private string currentMANV;
         private DataGridView dgvLop;
 
-        public UcNhapDiem()
+        public UcNhapDiem(string manv)
         {
             InitializeComponent();
+            currentMANV = manv;
             InitializeGrid();
             LoadLopData();
         }

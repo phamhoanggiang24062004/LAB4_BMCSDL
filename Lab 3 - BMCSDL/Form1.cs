@@ -1,4 +1,8 @@
-﻿namespace Lab_3___BMCSDL
+﻿using System.Data.SqlClient;
+using System.Text;
+using System.Security.Cryptography;
+
+namespace Lab_3___BMCSDL
 {
     public partial class Form1 : Form
     {
@@ -95,21 +99,60 @@
         {
             string user = txtUsername.Text.Trim();
             string pass = txtPassword.Text;
-            this.DialogResult = DialogResult.OK;
 
-            //// TODO: thay bằng kiểm tra database, API…
-            //if (user == "admin" && pass == "123")
-            //{
-            //    // Trả về OK để Program.cs biết đăng nhập thành công
-            //    this.DialogResult = DialogResult.OK;
-            //    this.Close();
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
-            //                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //    // Giữ form mở, DialogResult vẫn là None
-            //}
+            // Mã hóa mật khẩu người dùng nhập bằng SHA1
+            byte[] hashedPassword = HashPasswordWithSHA1(pass);
+
+            // Chuỗi kết nối đến cơ sở dữ liệu
+            string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
+
+            // Truy vấn kiểm tra thông tin đăng nhập
+            string query = "SELECT MANV FROM NHANVIEN WHERE TENDN = @Username AND MATKHAU = @Password";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        // Thêm tham số để tránh SQL Injection
+                        command.Parameters.AddWithValue("@Username", user);
+                        command.Parameters.AddWithValue("@Password", hashedPassword);
+
+                        object result = command.ExecuteScalar();
+
+                        if (result != null)
+                        {
+                            // Đăng nhập thành công bằng tài khoản người dùng
+                            string manv = result.ToString();
+                            Dashboard dashboard = new Dashboard(manv);
+                            this.Hide(); // Ẩn Form1
+                            dashboard.ShowDialog();
+                            this.Close(); // Đóng Form1 sau khi Dashboard đóng
+                        }
+                        else if(user == "admin" && pass == "123")
+                        {
+                            // Đăng nhập thành công bằng Admin 
+                            Dashboard dashboard = new Dashboard("NV01");
+                            this.Hide(); // Ẩn Form1
+                            dashboard.ShowDialog();
+                            this.Close(); // Đóng Form1 sau khi Dashboard đóng
+                        }
+                        else
+                        {
+                            // Sai tên đăng nhập hoặc mật khẩu
+                            MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
+                                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Đã xảy ra lỗi: {ex.Message}", "Lỗi",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }            
         }
 
         // Canh giữa cho Round Panel - nơi chứa chỗ đăng nhập 
@@ -125,6 +168,15 @@
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private byte[] HashPasswordWithSHA1(string password)
+        {
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                return sha1.ComputeHash(passwordBytes);
+            }
         }
     }
 }

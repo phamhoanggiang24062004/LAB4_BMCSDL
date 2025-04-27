@@ -22,10 +22,12 @@ namespace Lab_3___BMCSDL
         private Button btnQuanLyLop;
         private Button btnQuanLySV;
         private Button btnNhapDiem;
+        private string _manv;
 
-        public Dashboard()
+        public Dashboard(string manv)
         {
             InitializeComponent();
+            _manv = manv;
             InitializeComponent_Dashboard();
 
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -89,14 +91,14 @@ namespace Lab_3___BMCSDL
             // Nhãn người dùng
             lblUser = new Label
             {
-                Text = "Xin chào, [User]",
+                Text = $"Xin chào, [ {_manv} ]",
                 Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point),
                 ForeColor = Color.White,
                 AutoSize = true,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(headerPanel.Width - 260, 20)
             };
             headerPanel.Controls.Add(lblUser);
+            lblUser.Location = new Point(headerPanel.Width - 120 - lblUser.Width, 20);
 
             // Nút đăng xuất
             btnLogout = new Button
@@ -112,6 +114,7 @@ namespace Lab_3___BMCSDL
             };
             btnLogout.FlatAppearance.BorderSize = 0;
             headerPanel.Controls.Add(btnLogout);
+            btnLogout.Click += BtnLogout_Click;
 
             // Khoảng cách giữa header và sidebar
             int verticalGap = 30;
@@ -154,11 +157,11 @@ namespace Lab_3___BMCSDL
 
             btnQuanLySV = CreateSidebarButton("Quản lý SV", 10, startY + (btnHeight + btnSpacing) * 2);
             sidebarPanel.Controls.Add(btnQuanLySV);
-            btnQuanLySV.Click += (s, e) => ShowContent(new UcQuanLySV());
+            btnQuanLySV.Click += (s, e) => ShowContent(new UcQuanLySV(_manv));
 
             btnNhapDiem = CreateSidebarButton("Nhập Điểm", 10, startY + (btnHeight + btnSpacing) * 3);
             sidebarPanel.Controls.Add(btnNhapDiem);
-            btnNhapDiem.Click += (s, e) => ShowContent(new UcNhapDiem());
+            btnNhapDiem.Click += (s, e) => ShowContent(new UcNhapDiem(_manv));
 
             // Khung nội dung chính (Content)
             int contentX = sidebarPanel.Right + horizontalGap;
@@ -205,6 +208,15 @@ namespace Lab_3___BMCSDL
 
             // Thêm vào content panel
             contentPanel.Controls.Add(control);
+        }
+
+        private void BtnLogout_Click(object sender, EventArgs e)
+        {
+            // Hiển thị lại Form1 (form đăng nhập)
+            Form1 loginForm = new Form1();
+            this.Hide(); // Ẩn Dashboard
+            loginForm.ShowDialog();
+            this.Close(); // Đóng Dashboard sau khi Form1 được đóng
         }
 
     }
