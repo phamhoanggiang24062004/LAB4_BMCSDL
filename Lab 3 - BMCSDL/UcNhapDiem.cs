@@ -15,12 +15,14 @@ namespace Lab_3___BMCSDL
     {
         string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
         private string currentMANV;
+        private string password;
         private DataGridView dgvLop;
 
-        public UcNhapDiem(string manv)
+        public UcNhapDiem(string manv, string pass)
         {
             InitializeComponent();
             currentMANV = manv;
+            password = pass;
             InitializeGrid();
             LoadLopData();
         }
@@ -63,8 +65,10 @@ namespace Lab_3___BMCSDL
                 {
                     conn.Open();
 
-                    string queryLop = "SELECT MALOP, TENLOP FROM LOP WHERE MANV = @MANV";
-                    SqlCommand cmdLop = new SqlCommand(queryLop, conn);
+                    // Gọi Stored Procedure thay vì tự viết query
+                    SqlCommand cmdLop = new SqlCommand("SP_QUANLY_LOPHOC_NHANVIEN", conn);
+                    cmdLop.CommandType = CommandType.StoredProcedure; // Rất quan trọng
+
                     cmdLop.Parameters.AddWithValue("@MANV", currentMANV);
 
                     SqlDataAdapter adapterLop = new SqlDataAdapter(cmdLop);
@@ -76,7 +80,7 @@ namespace Lab_3___BMCSDL
                     // Sau khi load xong dữ liệu, tính và cập nhật chiều cao
                     int newHeight = TinhChieuCaoDataGridView(dgvLop);
                     // Giới hạn chiều cao tối đa, 900 - headerPanel.Height - verticalGap
-                    int maxHeight = 900 - 60 - 30; 
+                    int maxHeight = 900 - 60 - 30;
                     dgvLop.Height = Math.Min(newHeight, maxHeight);
                 }
             }
@@ -108,13 +112,14 @@ namespace Lab_3___BMCSDL
                 string tenlop = row.Cells["TENLOP"].Value.ToString();
 
                 string mahp = GetMAHP_From_TENLOP(tenlop);
+
                 if (string.IsNullOrEmpty(mahp))
                 {
                     MessageBox.Show("Không tìm thấy học phần phù hợp với lớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                FormNhapDiem frm = new FormNhapDiem(malop, tenlop, mahp);
+                FormNhapDiem frm = new FormNhapDiem(malop, tenlop, mahp, currentMANV, password);
                 frm.StartPosition = FormStartPosition.CenterScreen;
                 frm.ShowDialog(); // dùng ShowDialog để buộc người dùng nhập xong mới quay về
             }
@@ -128,12 +133,9 @@ namespace Lab_3___BMCSDL
             {
                 conn.Open();
 
-                // Tách tên học phần ra khỏi tên lớp (giả sử sau dấu '-')
-                string tenHP_Guess = tenlop.Contains("-") ? tenlop.Split('-')[1].Trim() : tenlop.Trim();
-
                 string query = "SELECT MAHP FROM HOCPHAN WHERE TENHP LIKE @TENHP";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@TENHP", "%" + tenHP_Guess + "%");
+                cmd.Parameters.AddWithValue("@TENHP", tenlop);
 
                 object result = cmd.ExecuteScalar();
                 if (result != null)

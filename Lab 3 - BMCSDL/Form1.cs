@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using System.Text;
 using System.Security.Cryptography;
+using System.Data;
 
 namespace Lab_3___BMCSDL
 {
@@ -106,42 +107,45 @@ namespace Lab_3___BMCSDL
             // Chuỗi kết nối đến cơ sở dữ liệu
             string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
 
-            // Truy vấn kiểm tra thông tin đăng nhập
-            string query = "SELECT MANV FROM NHANVIEN WHERE TENDN = @Username AND MATKHAU = @Password";
-
             try
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand command = new SqlCommand(query, connection))
+
+                    using (SqlCommand command = new SqlCommand("SP_KIEMTRA_DANGNHAP", connection))
                     {
-                        // Thêm tham số để tránh SQL Injection
-                        command.Parameters.AddWithValue("@Username", user);
-                        command.Parameters.AddWithValue("@Password", hashedPassword);
+                        command.CommandType = CommandType.StoredProcedure;
 
-                        object result = command.ExecuteScalar();
+                        // Tham số input
+                        command.Parameters.AddWithValue("@USERNAME", user);
+                        command.Parameters.AddWithValue("@PASSWORD", hashedPassword);
 
-                        if (result != null)
+                        // Tham số output
+                        SqlParameter returnManvParam = new SqlParameter("@RETURN_MANV", SqlDbType.VarChar, 20);
+                        returnManvParam.Direction = ParameterDirection.Output;
+                        command.Parameters.Add(returnManvParam);
+
+                        command.ExecuteNonQuery();
+
+                        string manv = returnManvParam.Value as string;
+
+                        if (!string.IsNullOrEmpty(manv))
                         {
-                            // Đăng nhập thành công bằng tài khoản người dùng
-                            string manv = result.ToString();
-                            Dashboard dashboard = new Dashboard(manv);
-                            this.Hide(); // Ẩn Form1
+                            Dashboard dashboard = new Dashboard(manv, pass);
+                            this.Hide();
                             dashboard.ShowDialog();
-                            this.Close(); // Đóng Form1 sau khi Dashboard đóng
+                            this.Close();
                         }
-                        else if(user == "admin" && pass == "123")
+                        else if (user == "admin" && pass == "123")
                         {
-                            // Đăng nhập thành công bằng Admin 
-                            Dashboard dashboard = new Dashboard("NV01");
-                            this.Hide(); // Ẩn Form1
+                            Dashboard dashboard = new Dashboard("NV01", pass);
+                            this.Hide();
                             dashboard.ShowDialog();
-                            this.Close(); // Đóng Form1 sau khi Dashboard đóng
+                            this.Close();
                         }
                         else
                         {
-                            // Sai tên đăng nhập hoặc mật khẩu
                             MessageBox.Show("Sai tên đăng nhập hoặc mật khẩu!", "Lỗi",
                                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }

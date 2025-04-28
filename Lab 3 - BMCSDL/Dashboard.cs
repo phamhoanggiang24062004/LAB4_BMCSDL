@@ -23,11 +23,13 @@ namespace Lab_3___BMCSDL
         private Button btnQuanLySV;
         private Button btnNhapDiem;
         private string _manv;
+        private string _pass;
 
-        public Dashboard(string manv)
+        public Dashboard(string manv, string pass)
         {
             InitializeComponent();
             _manv = manv;
+            _pass = pass;
             InitializeComponent_Dashboard();
 
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -161,7 +163,7 @@ namespace Lab_3___BMCSDL
 
             btnNhapDiem = CreateSidebarButton("Nhập Điểm", 10, startY + (btnHeight + btnSpacing) * 3);
             sidebarPanel.Controls.Add(btnNhapDiem);
-            btnNhapDiem.Click += (s, e) => ShowContent(new UcNhapDiem(_manv));
+            btnNhapDiem.Click += (s, e) => ShowContent(new UcNhapDiem(_manv, _pass));
 
             // Khung nội dung chính (Content)
             int contentX = sidebarPanel.Right + horizontalGap;

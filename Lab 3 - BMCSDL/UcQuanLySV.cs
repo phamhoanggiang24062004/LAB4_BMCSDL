@@ -52,10 +52,13 @@ namespace Lab_3___BMCSDL
                 {
                     conn.Open();
 
-                    // Lấy tất cả lớp do nhân viên quản lý
-                    string queryLop = "SELECT MALOP, TENLOP FROM LOP WHERE MANV = @MANV";
-                    SqlCommand cmdLop = new SqlCommand(queryLop, conn);
+                    // Lấy tất cả lớp do nhân viên quản lý bằng Stored Procedure
+                    SqlCommand cmdLop = new SqlCommand("SP_QUANLY_LOPHOC_NHANVIEN", conn);
+                    cmdLop.CommandType = CommandType.StoredProcedure;
+
+                    // Thêm tham số
                     cmdLop.Parameters.AddWithValue("@MANV", currentMANV);
+
 
                     SqlDataAdapter adapterLop = new SqlDataAdapter(cmdLop);
                     DataTable dtLop = new DataTable();
@@ -173,8 +176,9 @@ namespace Lab_3___BMCSDL
 
         private void LoadSinhVienForLop(string malop, DataGridView dgv, SqlConnection conn)
         {
-            string querySV = @"SELECT MASV, HOTEN, NGAYSINH, DIACHI, TENDN, MATKHAU FROM SINHVIEN WHERE MALOP = @MALOP";
-            SqlCommand cmd = new SqlCommand(querySV, conn);
+            SqlCommand cmd = new SqlCommand("SP_QUANLY_SINHVIEN", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
             cmd.Parameters.AddWithValue("@MALOP", malop);
 
             SqlDataAdapter adapter = new SqlDataAdapter(cmd);
@@ -184,12 +188,14 @@ namespace Lab_3___BMCSDL
             dt.Columns.Add("NEW_PASSWORD", typeof(string)); // thêm cột giả cho password được mã hóa 
             dgv.DataSource = dt;
 
-            // Cấu hình cho phép sửa các cột phù hợp
-            dgv.Columns["MASV"].ReadOnly = true; // không cho sửa mã sinh viên
-            // Ẩn cột mật khẩu
             if (dgv.Columns.Contains("MATKHAU"))
             {
-                dgv.Columns["MATKHAU"].Visible = false;
+                dgv.Columns["MATKHAU"].Visible = false; // Ẩn cột mật khẩu gốc
+            }
+
+            if (dgv.Columns.Contains("MASV"))
+            {
+                dgv.Columns["MASV"].ReadOnly = true; // không cho sửa Mã sinh viên
             }
         }
 
@@ -241,35 +247,38 @@ namespace Lab_3___BMCSDL
                         if (string.IsNullOrWhiteSpace(masv) || string.IsNullOrWhiteSpace(hoten) ||
                             string.IsNullOrWhiteSpace(tendangnhap) || finalPassword == null)
                         {
-                            MessageBox.Show($"Thiếu thông tin bắt buộc ở sinh viên có mã: {masv}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show($"Thiếu thông tin [MASV] [TENDN] [HOTEN] bắt buộc ở sinh viên có mã: {masv}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             continue;
                         }
 
-                        using (SqlCommand updateCmd = new SqlCommand(@"
-                        UPDATE SINHVIEN 
-                        SET HOTEN = @HOTEN, NGAYSINH = @NGAYSINH, DIACHI = @DIACHI,
-                            TENDN = @TENDN, MATKHAU = @MATKHAU, MALOP = @MALOP
-                        WHERE MASV = @MASV", conn))
+                        using (SqlCommand cmd = new SqlCommand("SP_CAPNHAT_SINHVIEN", conn))
                         {
-                            updateCmd.Parameters.AddWithValue("@MASV", masv);
-                            updateCmd.Parameters.AddWithValue("@HOTEN", hoten ?? (object)DBNull.Value);
-                            updateCmd.Parameters.AddWithValue("@NGAYSINH", ngaysinh ?? (object)DBNull.Value);
-                            updateCmd.Parameters.AddWithValue("@DIACHI", diachi ?? (object)DBNull.Value);
-                            updateCmd.Parameters.AddWithValue("@MALOP", malop ?? (object)DBNull.Value);
-                            updateCmd.Parameters.AddWithValue("@TENDN", tendangnhap ?? (object)DBNull.Value);
-                            updateCmd.Parameters.AddWithValue("@MATKHAU", finalPassword ?? (object)DBNull.Value);
+                            cmd.CommandType = CommandType.StoredProcedure;
 
-                            updateCmd.ExecuteNonQuery();
+                            // Thêm tham số
+                            cmd.Parameters.AddWithValue("@MASV", masv);
+                            cmd.Parameters.AddWithValue("@HOTEN", hoten);
+                            cmd.Parameters.AddWithValue("@NGAYSINH", ngaysinh ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@DIACHI", diachi ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@MALOP", malop ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@TENDN", tendangnhap);
+                            cmd.Parameters.AddWithValue("@MATKHAU", finalPassword ?? (object)DBNull.Value);
+
+                            cmd.ExecuteNonQuery();
                         }
 
                         // Xóa dữ liệu cột NEW_PASSWORD để tránh cập nhật lại
                         row.Cells["NEW_PASSWORD"].Value = null;
 
-                        MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Cập nhật sinh viên {masv} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (SqlException ex)
+                    {
+                        MessageBox.Show($"Lỗi SQL khi cập nhật sinh viên {masv}: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Lỗi cập nhật sinh viên {masv}: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 

@@ -59,8 +59,10 @@ namespace Lab_3___BMCSDL
                 {
                     conn.Open();
 
-                    string query = "SELECT MALOP, TENLOP, MANV FROM LOP";
-                    SqlDataAdapter adapter = new SqlDataAdapter(query, conn);
+                    SqlCommand cmd = new SqlCommand("SP_QUANLY_LOPHOC", conn);
+                    cmd.CommandType = CommandType.StoredProcedure; // QUAN TRỌNG: Xác định đây là SP
+
+                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                     DataTable table = new DataTable();
                     adapter.Fill(table);
 
