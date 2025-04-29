@@ -1,7 +1,3 @@
-```bash
-#!/usr/bin/env bash
-# Script này tự động tạo file README.md
-cat << 'EOF' > README.md
 # README - Bài Thực Hành Số 3: Mã Hóa Dữ Liệu Công Khai
 
 ## 1. Giới thiệu
@@ -39,5 +35,4 @@ Bài thực hành số 3 trong học phần bảo mật và mã hóa dữ liệu
 
 4. **Nhập điểm**
    - Xem điểm và nhập điểm cho sinh viên.
-EOF
 
