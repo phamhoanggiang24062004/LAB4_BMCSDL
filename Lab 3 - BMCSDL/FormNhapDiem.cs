@@ -30,7 +30,7 @@ namespace Lab_3___BMCSDL
             this.manv = manv;
             this.password = password;
 
-            this.Text = $"Nhập điểm cho lớp: {tenlop} ({malop})";
+            this.Text = $"Nhập điểm cho lớp: {malop} - {tenlop} - {mahp} của nhân viên {manv}";
             InitializeGrid();
             LoadSinhVienTheoLop();
         }
@@ -74,6 +74,8 @@ namespace Lab_3___BMCSDL
                 // Thêm tham số cho Stored Procedure
                 cmd.Parameters.AddWithValue("@MALOP", malop);
                 cmd.Parameters.AddWithValue("@MANV", manv);
+                cmd.Parameters.AddWithValue("@MAHP", mahp);
+                cmd.Parameters.AddWithValue("@MK", password);
 
                 // Lấy dữ liệu ra DataTable
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd);
@@ -115,13 +117,17 @@ namespace Lab_3___BMCSDL
                     int.TryParse(diemObj.ToString(), out diem);
 
                     // Gọi Stored Procedure SP_NHAPDIEM_SINHVIEN
-                    SqlCommand cmd = new SqlCommand("SP_NHAPDIEM_SINHVIEN", conn);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (SqlCommand cmd = new SqlCommand("SP_NHAPDIEM_SINHVIEN", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@DIEM", diem); // ép về int vì @DIEM là int
-                    cmd.Parameters.AddWithValue("@MASV", masv);
-                    cmd.Parameters.AddWithValue("@MAHP", mahp);
-                    cmd.Parameters.AddWithValue("@MANV", manv);
+                        cmd.Parameters.AddWithValue("@DIEM", diem);
+                        cmd.Parameters.AddWithValue("@MASV", masv);
+                        cmd.Parameters.AddWithValue("@MAHP", mahp);
+                        cmd.Parameters.AddWithValue("@MANV", manv);
+
+                        cmd.ExecuteNonQuery(); // Thực thi stored procedure không trả về dữ liệu
+                    }
                 }
 
                 MessageBox.Show("Lưu điểm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);

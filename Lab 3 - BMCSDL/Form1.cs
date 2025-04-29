@@ -178,9 +178,15 @@ namespace Lab_3___BMCSDL
         {
             using (SHA1 sha1 = SHA1.Create())
             {
-                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] passwordBytes = Encoding.Unicode.GetBytes(password);
                 return sha1.ComputeHash(passwordBytes);
             }
         }
+
+        private string ByteArrayToHexString(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
     }
 }
