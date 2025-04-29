@@ -44,6 +44,7 @@ namespace Lab_3___BMCSDL
             this.Controls.Add(flowPanel);
         }
 
+        // --- Hiển thị danh sách sinh viên theo lớp ---
         private void LoadSinhVienTheoLop()
         {
             try
@@ -59,7 +60,6 @@ namespace Lab_3___BMCSDL
                     // Thêm tham số
                     cmdLop.Parameters.AddWithValue("@MANV", currentMANV);
 
-
                     SqlDataAdapter adapterLop = new SqlDataAdapter(cmdLop);
                     DataTable dtLop = new DataTable();
                     adapterLop.Fill(dtLop);
@@ -69,7 +69,7 @@ namespace Lab_3___BMCSDL
                         string malop = row["MALOP"].ToString();
                         string tenlop = row["TENLOP"].ToString();
 
-                        // Tạo GroupBox cho mỗi lớp
+                        // --- Tạo GroupBox cho mỗi lớp --- 
                         GroupBox groupBox = new GroupBox
                         {
                             Text = $"Lớp: {tenlop} ({malop})",
@@ -80,10 +80,10 @@ namespace Lab_3___BMCSDL
                             AutoSizeMode = AutoSizeMode.GrowAndShrink
                         };
 
-                        // Button toggle
+                        // --- Button toggle ---
                         Button toggleButton = new Button
                         {
-                            Text = "▼", // Hình tam giác chỉ xuống
+                            Text = "▼",
                             Width = 30,
                             Height = 25,
                             Location = new Point(groupBox.Width - 40, 20),
@@ -92,14 +92,14 @@ namespace Lab_3___BMCSDL
                         };
                         groupBox.Controls.Add(toggleButton);
 
-                        // Panel để chứa DataGridView
+                        // --- Panel để chứa DataGridView --- 
                         Panel panelContent = new Panel
                         {
                             Dock = DockStyle.Bottom,
                             Visible = false // Ban đầu ẩn
                         };
 
-                        // Tạo DataGridView và add vào GroupBox
+                        // --- Tạo DataGridView và add vào GroupBox --- 
                         DataGridView dgv = new DataGridView
                         {
                             Dock = DockStyle.Top,
@@ -109,6 +109,7 @@ namespace Lab_3___BMCSDL
                             ReadOnly = false
                         };
 
+                        // --- Nút cập nhật cho DataGridView ---
                         Button btnCapNhat = new Button
                         {
                             Text = "Cập nhật thông tin",
@@ -118,7 +119,7 @@ namespace Lab_3___BMCSDL
                             Font = new Font("Segoe UI", 9),
                             Visible = false // Ẩn ban đầu
                         };
-                        btnCapNhat.Location = new Point(20, 10); // vị trí tạm, sẽ chỉnh lại bên dưới
+                        btnCapNhat.Location = new Point(20, 10);        // vị trí tạm, sẽ chỉnh lại bên dưới
 
                         // Gắn sự kiện gọi hàm cập nhật
                         btnCapNhat.Click += (s, e) => CapNhatDuLieuSinhVien(malop, dgv);
@@ -138,7 +139,7 @@ namespace Lab_3___BMCSDL
                             if (panelContent.Visible)
                             {
                                 // Tính toán chiều cao vừa đủ cho nội dung
-                                int rowHeight = dgv.RowTemplate.Height; // chiều cao trung bình mỗi dòng
+                                int rowHeight = dgv.RowTemplate.Height;     // chiều cao trung bình mỗi dòng
                                 int rowCount = dgv.Rows.Count;
 
                                 // Tính tổng chiều cao thực tế: dòng + header + padding
@@ -152,7 +153,7 @@ namespace Lab_3___BMCSDL
 
                                 // Cập nhật chiều cao cho panelContent và groupBox
                                 dgv.Height = dgvHeight;
-                                btnCapNhat.Top = dgv.Bottom + 10; // đặt nút dưới bảng
+                                btnCapNhat.Top = dgv.Bottom + 10;           // đặt nút dưới bảng
                                 panelContent.Height = dgvHeight + btnCapNhat.Height + 20;
 
                                 groupBox.Height = panelContent.Height + 60; // 60 là phần header + margin GroupBox
@@ -190,12 +191,12 @@ namespace Lab_3___BMCSDL
 
             if (dgv.Columns.Contains("MATKHAU"))
             {
-                dgv.Columns["MATKHAU"].Visible = false; // Ẩn cột mật khẩu gốc
+                dgv.Columns["MATKHAU"].Visible = false;     // Ẩn cột mật khẩu gốc
             }
 
             if (dgv.Columns.Contains("MASV"))
             {
-                dgv.Columns["MASV"].ReadOnly = true; // không cho sửa Mã sinh viên
+                dgv.Columns["MASV"].ReadOnly = true;        // không cho sửa Mã sinh viên
             }
         }
 
@@ -214,6 +215,8 @@ namespace Lab_3___BMCSDL
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
+
+                bool thanh_cong = true;
 
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
@@ -247,7 +250,9 @@ namespace Lab_3___BMCSDL
                         if (string.IsNullOrWhiteSpace(masv) || string.IsNullOrWhiteSpace(hoten) ||
                             string.IsNullOrWhiteSpace(tendangnhap) || finalPassword == null)
                         {
-                            MessageBox.Show($"Thiếu thông tin [MASV] [TENDN] [HOTEN] bắt buộc ở sinh viên có mã: {masv}", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show($"Thiếu thông tin [MASV] [TENDN] [HOTEN] bắt buộc ở sinh viên có mã: {masv}", 
+                                            "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            thanh_cong = false;
                             continue;
                         }
 
@@ -270,18 +275,26 @@ namespace Lab_3___BMCSDL
                         // Xóa dữ liệu cột NEW_PASSWORD để tránh cập nhật lại
                         row.Cells["NEW_PASSWORD"].Value = null;
 
-                        MessageBox.Show($"Cập nhật sinh viên {masv} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (SqlException ex)
                     {
-                        MessageBox.Show($"Lỗi SQL khi cập nhật sinh viên {masv}: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Lỗi SQL khi cập nhật sinh viên {masv}: {ex.Message}", "Lỗi", 
+                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        thanh_cong = false;
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", 
+                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        thanh_cong = false;
                     }
                 }
 
+                if (thanh_cong)
+                {
+                    MessageBox.Show($"Cập nhật sinh viên thành công!", "Thông báo", 
+                                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
     }

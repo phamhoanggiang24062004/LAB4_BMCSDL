@@ -31,7 +31,6 @@ namespace Lab_3___BMCSDL
             _manv = manv;
             _pass = pass;
             InitializeComponent_Dashboard();
-
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Size = new Size(1000, 700);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -59,7 +58,7 @@ namespace Lab_3___BMCSDL
 
         private void InitializeComponent_Dashboard()
         {
-            // Kích thước cố định của form - Window
+            // --- Kích thước cố định của form ---
             this.Text = "Dashboard";
             this.ClientSize = new Size(1500, 1000);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -67,10 +66,10 @@ namespace Lab_3___BMCSDL
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
 
-            // Màu chính
+            // --- Màu chính ---
             Color primaryColor = Color.FromArgb(0x2D, 0x8C, 0xFF);
 
-            // Thanh đầu (Header)
+            // --- Thanh Header ---
             headerPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -79,7 +78,7 @@ namespace Lab_3___BMCSDL
             };
             this.Controls.Add(headerPanel);
 
-            // Tiêu đề ứng dụng
+            // --- Tiêu đề ứng dụng ---
             lblAppTitle = new Label
             {
                 Text = "QLSV Dashboard",
@@ -90,7 +89,7 @@ namespace Lab_3___BMCSDL
             };
             headerPanel.Controls.Add(lblAppTitle);
 
-            // Nhãn người dùng
+            // --- Nhãn người dùng ---
             lblUser = new Label
             {
                 Text = $"Xin chào, [ {_manv} ]",
@@ -102,7 +101,7 @@ namespace Lab_3___BMCSDL
             headerPanel.Controls.Add(lblUser);
             lblUser.Location = new Point(headerPanel.Width - 120 - lblUser.Width, 20);
 
-            // Nút đăng xuất
+            // --- Nút đăng xuất ---
             btnLogout = new Button
             {
                 Text = "Đăng xuất",
@@ -126,13 +125,13 @@ namespace Lab_3___BMCSDL
             int btnWidth = 200;
             int btnHeight = 40;
             int btnCount = 4;
-            int btnSpacing = 10;  // khoảng cách giữa các nút
-            int marginTop = 20;  // khoảng cách từ đỉnh panel đến nút đầu
-            int marginBottom = 20;  // khoảng cách từ nút cuối đến đáy panel
+            int btnSpacing = 10;                        // khoảng cách giữa các nút
+            int marginTop = 20;                         // khoảng cách từ đỉnh panel đến nút đầu
+            int marginBottom = 20;                      // khoảng cách từ nút cuối đến đáy panel
 
             int sidebarX = horizontalGap;
             int sidebarY = headerPanel.Height + verticalGap;
-            int sidebarWidth = btnWidth + 20;  // đệm 10px trái + 10px phải
+            int sidebarWidth = btnWidth + 20;           // đệm 10px trái + 10px phải
 
             // Tính chiều cao vừa đủ cho 4 nút
             int sidebarHeight = marginTop + btnCount * btnHeight + (btnCount - 1) * btnSpacing + marginBottom;
@@ -146,8 +145,8 @@ namespace Lab_3___BMCSDL
             };
             this.Controls.Add(sidebarPanel);
 
-            // Các nút trên sidebar
-            int startY = marginTop;  // bắt đầu từ marginTop
+            // --- Các nút trên sidebar ---
+            int startY = marginTop;                     // bắt đầu từ marginTop
 
             btnDashboard = CreateSidebarButton("Dashboard", 10, startY);
             sidebarPanel.Controls.Add(btnDashboard);
@@ -165,7 +164,7 @@ namespace Lab_3___BMCSDL
             sidebarPanel.Controls.Add(btnNhapDiem);
             btnNhapDiem.Click += (s, e) => ShowContent(new UcNhapDiem(_manv, _pass));
 
-            // Khung nội dung chính (Content)
+            // --- Khung nội dung chính (Content) --- 
             int contentX = sidebarPanel.Right + horizontalGap;
             int contentY = sidebarY;
             int contentWidth = this.ClientSize.Width - contentX;
@@ -180,7 +179,7 @@ namespace Lab_3___BMCSDL
             this.Controls.Add(contentPanel);
         }
 
-        // Tạo nút sidebar
+        // --- Tạo nút sidebar ---
         private Button CreateSidebarButton(string text, int x, int y)
         {
             Color primaryColor = Color.FromArgb(0x2D, 0x8C, 0xFF);
@@ -199,7 +198,7 @@ namespace Lab_3___BMCSDL
             return btn;
         }
 
-        // Hiển thị nội dung mới
+        // --- Hiển thị nội dung mới --- 
         private void ShowContent(UserControl control)
         {
             // Xóa nội dung cũ
@@ -212,13 +211,13 @@ namespace Lab_3___BMCSDL
             contentPanel.Controls.Add(control);
         }
 
+        // --- Đăng xuất ---
         private void BtnLogout_Click(object sender, EventArgs e)
         {
-            // Hiển thị lại Form1 (form đăng nhập)
             Form1 loginForm = new Form1();
-            this.Hide(); // Ẩn Dashboard
+            this.Hide(); 
             loginForm.ShowDialog();
-            this.Close(); // Đóng Dashboard sau khi Form1 được đóng
+            this.Close(); 
         }
 
     }

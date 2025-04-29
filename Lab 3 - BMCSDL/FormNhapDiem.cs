@@ -29,7 +29,6 @@ namespace Lab_3___BMCSDL
             this.mahp = mahp;
             this.manv = manv;
             this.password = password;
-
             this.Text = $"Nhập điểm cho lớp: {malop} - {tenlop} - {mahp} của nhân viên {manv}";
             InitializeGrid();
             LoadSinhVienTheoLop();
@@ -39,6 +38,7 @@ namespace Lab_3___BMCSDL
 
         private void InitializeGrid()
         {
+            // --- Khởi tạo DataGridView --- 
             dgv = new DataGridView
             {
                 Dock = DockStyle.Fill,
@@ -48,6 +48,7 @@ namespace Lab_3___BMCSDL
                 AllowUserToDeleteRows = false
             };
 
+            // --- Nút Lưu điểm ---
             btnLuuDiem = new Button
             {
                 Text = "Lưu điểm",
@@ -61,6 +62,7 @@ namespace Lab_3___BMCSDL
             this.Controls.Add(dgv);
         }
 
+        // --- Hiển thị điểm thi sinh viên theo lớp ---
         private void LoadSinhVienTheoLop()
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -89,7 +91,7 @@ namespace Lab_3___BMCSDL
 
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
-                    col.ReadOnly = col.Name != "DIEM_MOI"; // Chỉ cột điểm được nhập
+                    col.ReadOnly = col.Name != "DIEM_MOI";      // Chỉ cột điểm được nhập
                 }
 
                 dgv.Columns["MASV"].HeaderText = "Mã SV";
@@ -98,12 +100,14 @@ namespace Lab_3___BMCSDL
             }
         }
 
+        // --- Lưu điểm ---
         private void BtnLuuDiem_Click(object sender, EventArgs e)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
+                // Duyệt qua từng dòng trong DataGridView
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
                     if (row.IsNewRow) continue;
@@ -126,11 +130,12 @@ namespace Lab_3___BMCSDL
                         cmd.Parameters.AddWithValue("@MAHP", mahp);
                         cmd.Parameters.AddWithValue("@MANV", manv);
 
-                        cmd.ExecuteNonQuery(); // Thực thi stored procedure không trả về dữ liệu
+                        cmd.ExecuteNonQuery();                  // Thực thi stored procedure
                     }
                 }
 
-                MessageBox.Show("Lưu điểm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Lưu điểm thành công!", "Thông báo", 
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

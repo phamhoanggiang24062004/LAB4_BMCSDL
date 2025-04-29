@@ -29,12 +29,12 @@ namespace Lab_3___BMCSDL
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 BackColor = Color.White,
                 Padding = new Padding(10),
-                Anchor = AnchorStyles.Top, // Căn trên (và giữa ngang)
+                Anchor = AnchorStyles.Top,                  // Căn trên (và giữa ngang)
                 Margin = new Padding(0),
                 Dock = DockStyle.None
             };
 
-            // Tiêu đề
+            // --- Tiêu đề --- 
             Label title = new Label
             {
                 Text = "👨‍💻 GIỚI THIỆU NHÓM",
@@ -46,7 +46,7 @@ namespace Lab_3___BMCSDL
             };
             centerPanel.Controls.Add(title);
 
-            // Danh sách thành viên
+            // --- Danh sách thành viên --- 
             string[] thanhVien = {
                 "MSSV 22120074 - Đỗ Nhật Duy",
                 "MSSV 221200** - Đỗ Văn Hải",
@@ -82,9 +82,9 @@ namespace Lab_3___BMCSDL
             wrapper.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
 
             // Hàng trên cùng chiếm ít, hàng giữa chứa nội dung, hàng dưới chiếm phần còn lại
-            wrapper.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F)); // Khoảng cách từ trên xuống
+            wrapper.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));    // Khoảng cách từ trên xuống
             wrapper.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            wrapper.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // phần còn lại
+            wrapper.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));    // phần còn lại
 
             // Thêm panel vào giữa (hàng 1, cột 1)
             wrapper.Controls.Add(centerPanel, 1, 1);

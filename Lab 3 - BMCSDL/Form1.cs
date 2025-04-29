@@ -16,7 +16,8 @@ namespace Lab_3___BMCSDL
         {
             InitializeComponent();
             InitializeLoginForm();
-
+            // Nút Enter cho đăng nhập
+            this.AcceptButton = btnLogin;
             // Đăng ký sự kiện Resize cho Form
             this.Resize += MainForm_Resize;
         }
@@ -27,7 +28,7 @@ namespace Lab_3___BMCSDL
             this.Text = "Đăng nhập";
             this.StartPosition = FormStartPosition.CenterScreen;
             this.ClientSize = new Size(800, 600);
-            // Background sẽ thêm sau, ví dụ:
+            // Background sẽ thêm sau
             this.BackgroundImage = Image.FromFile("C:\\Users\\PC\\Downloads\\microsoft-windows-3840x2160-12507.jpg");
             this.BackgroundImageLayout = ImageLayout.Stretch;
 
@@ -37,7 +38,7 @@ namespace Lab_3___BMCSDL
                 CornerRadius = 20,
                 BorderColor = Color.LightBlue,
                 BorderThickness = 2,
-                BackColor = Color.FromArgb(240, 248, 255), // màu nền nhạt
+                BackColor = Color.FromArgb(240, 248, 255),      // màu nền nhạt
                 Size = new Size(400, 230),
             };
 
@@ -62,7 +63,6 @@ namespace Lab_3___BMCSDL
             {
                 Size = new Size(360, 25),
                 Location = new Point(20, 45)
-                // Nếu bạn dùng .NET 6+, có thể thêm: PlaceholderText = "Nhập tên đăng nhập"
             };
             panelLogin.Controls.Add(txtUsername);
 
@@ -80,7 +80,6 @@ namespace Lab_3___BMCSDL
                 Size = new Size(360, 25),
                 Location = new Point(20, 105),
                 UseSystemPasswordChar = true
-                // Nếu .NET cũ không hỗ trợ PlaceholderText, bạn có thể tự custom watermark
             };
             panelLogin.Controls.Add(txtPassword);
 
@@ -95,9 +94,10 @@ namespace Lab_3___BMCSDL
             panelLogin.Controls.Add(btnLogin);
         }
 
-        // Xác thực đăng nhập 
+        // --- Xác thực đăng nhập --- 
         private void BtnLogin_Click(object sender, EventArgs e)
         {
+            // Lấy tên đăng nhập và mật khẩu từ TextBox
             string user = txtUsername.Text.Trim();
             string pass = txtPassword.Text;
 
@@ -113,6 +113,7 @@ namespace Lab_3___BMCSDL
                 {
                     connection.Open();
 
+                    // Tạo SqlCommand để gọi Stored Procedure
                     using (SqlCommand command = new SqlCommand("SP_KIEMTRA_DANGNHAP", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
@@ -174,6 +175,7 @@ namespace Lab_3___BMCSDL
 
         }
 
+        // --- Mã hóa mật khẩu bằng SHA1 - UTF16 LE ---
         private byte[] HashPasswordWithSHA1(string password)
         {
             using (SHA1 sha1 = SHA1.Create())
@@ -182,11 +184,5 @@ namespace Lab_3___BMCSDL
                 return sha1.ComputeHash(passwordBytes);
             }
         }
-
-        private string ByteArrayToHexString(byte[] bytes)
-        {
-            return BitConverter.ToString(bytes).Replace("-", "");
-        }
-
     }
 }

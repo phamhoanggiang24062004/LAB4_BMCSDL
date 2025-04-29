@@ -48,7 +48,7 @@ namespace Lab_3___BMCSDL
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                ScrollBars = ScrollBars.Vertical // Cho cuộn dọc nếu dữ liệu dài
+                ScrollBars = ScrollBars.Vertical    // Cho cuộn dọc nếu dữ liệu dài
             };
 
             dgvLop.CellDoubleClick += DgvLop_CellDoubleClick;
@@ -57,6 +57,7 @@ namespace Lab_3___BMCSDL
             this.Controls.Add(containerPanel);
         }
 
+        // --- Hiển thị danh sách lớp học ---
         private void LoadLopData()
         {
             try
@@ -67,7 +68,7 @@ namespace Lab_3___BMCSDL
 
                     // Gọi Stored Procedure thay vì tự viết query
                     SqlCommand cmdLop = new SqlCommand("SP_QUANLY_LOPHOC_NHANVIEN", conn);
-                    cmdLop.CommandType = CommandType.StoredProcedure; // Rất quan trọng
+                    cmdLop.CommandType = CommandType.StoredProcedure;
 
                     cmdLop.Parameters.AddWithValue("@MANV", currentMANV);
 
@@ -86,23 +87,26 @@ namespace Lab_3___BMCSDL
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải dữ liệu lớp học: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi tải dữ liệu lớp học: " + ex.Message, "Lỗi", 
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // --- Tính chiều cao DataGridView ---
         private int TinhChieuCaoDataGridView(DataGridView dgv)
         {
-            int totalHeight = dgv.ColumnHeadersHeight; // Chiều cao phần header
+            int totalHeight = dgv.ColumnHeadersHeight;  // Chiều cao phần header
 
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 totalHeight += row.Height;
             }
-            totalHeight += 10; // padding nhỏ bên dưới
+            totalHeight += 10;                          // padding nhỏ bên dưới
 
             return totalHeight;
         }
 
+        // --- Double click vào dòng lớp để nhập điểm ---
         private void DgvLop_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -115,16 +119,18 @@ namespace Lab_3___BMCSDL
 
                 if (string.IsNullOrEmpty(mahp))
                 {
-                    MessageBox.Show("Không tìm thấy học phần phù hợp với lớp.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Không tìm thấy học phần phù hợp với lớp.", "Lỗi", 
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 FormNhapDiem frm = new FormNhapDiem(malop, tenlop, mahp, currentMANV, password);
                 frm.StartPosition = FormStartPosition.CenterScreen;
-                frm.ShowDialog(); // dùng ShowDialog để buộc người dùng nhập xong mới quay về
+                frm.ShowDialog();               // dùng ShowDialog để buộc người dùng nhập xong mới quay về
             }
         }
 
+        // --- Lấy mã học phần từ tên lớp ---
         private string GetMAHP_From_TENLOP(string tenlop)
         {
             string mahp = null;

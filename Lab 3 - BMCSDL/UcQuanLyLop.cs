@@ -25,13 +25,13 @@ namespace Lab_3___BMCSDL
 
         private void InitializeGrid()
         {
-            this.Dock = DockStyle.Fill;             // Phủ hết phần content 
+            this.Dock = DockStyle.Fill;                 // Phủ hết phần content 
             this.BackColor = Color.White;
 
             Panel containerPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(0, 0, 50, 0), // Tạo khoảng cách phải
+                Padding = new Padding(0, 0, 50, 0),     // Tạo khoảng cách phải
                 BackColor = Color.White
             };
 
@@ -44,13 +44,14 @@ namespace Lab_3___BMCSDL
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                ScrollBars = ScrollBars.Vertical // Cho cuộn dọc nếu dữ liệu dài
+                ScrollBars = ScrollBars.Vertical        // Cho cuộn dọc nếu dữ liệu dài
             };
 
             containerPanel.Controls.Add(dgvLop);
             this.Controls.Add(containerPanel);
         }
 
+        // --- Tải dữ liệu lớp học từ cơ sở dữ liệu ---
         private void LoadLopData()
         {
             try
@@ -60,7 +61,7 @@ namespace Lab_3___BMCSDL
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand("SP_QUANLY_LOPHOC", conn);
-                    cmd.CommandType = CommandType.StoredProcedure; // QUAN TRỌNG: Xác định đây là SP
+                    cmd.CommandType = CommandType.StoredProcedure; 
 
                     SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                     DataTable table = new DataTable();
@@ -77,19 +78,20 @@ namespace Lab_3___BMCSDL
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải dữ liệu lớp học: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khi tải dữ liệu lớp học: " + ex.Message, "Lỗi", 
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private int TinhChieuCaoDataGridView(DataGridView dgv)
         {
-            int totalHeight = dgv.ColumnHeadersHeight; // Chiều cao phần header
+            int totalHeight = dgv.ColumnHeadersHeight;  // Chiều cao phần header
 
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 totalHeight += row.Height;
             }
-            totalHeight += 10; // padding nhỏ bên dưới
+            totalHeight += 10;                          // padding nhỏ bên dưới
 
             return totalHeight;
         }
