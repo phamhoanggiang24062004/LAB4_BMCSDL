@@ -133,14 +133,23 @@ namespace Lab_3___BMCSDL
             {
                 conn.Open();
 
-                string query = "SELECT MAHP FROM HOCPHAN WHERE TENHP LIKE @TENHP";
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@TENHP", tenlop);
-
-                object result = cmd.ExecuteScalar();
-                if (result != null)
+                // Gọi stored procedure thay vì viết trực tiếp câu lệnh SQL
+                using (SqlCommand cmd = new SqlCommand("SP_TIM_HOCPHAN_THEOTEN", conn))
                 {
-                    mahp = result.ToString();
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // Thêm tham số đầu vào cho stored procedure
+                    cmd.Parameters.AddWithValue("@TenLop", tenlop);
+
+                    // Thực hiện truy vấn, sử dụng ExecuteReader để lấy nhiều cột
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            // Cột MAHP nằm ở vị trí 0 (theo định nghĩa trong procedure)
+                            mahp = reader["MAHP"].ToString();
+                        }
+                    }
                 }
             }
 
