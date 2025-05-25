@@ -84,5 +84,53 @@ public class EmployeeKeyGenerator
         return rsa;          
     }
 
+
+    private byte[] EncryptPrivateKey(byte[] privateKey, string password)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            byte[] key = DeriveKeyFromPassword(password);
+            aes.Key = key;
+            aes.GenerateIV();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(aes.IV, 0, aes.IV.Length);
+                using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                {
+                    cs.Write(privateKey, 0, privateKey.Length);
+                }
+                return ms.ToArray();
+            }
+        }
+    }
+
+    private byte[] DecryptPrivateKey(byte[] encryptedData, string password)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            byte[] key = DeriveKeyFromPassword(password);
+            aes.Key = key;
+            byte[] iv = new byte[16];
+            Array.Copy(encryptedData, 0, iv, 0, 16);
+            aes.IV = iv;
+            using (MemoryStream ms = new MemoryStream())
+            using (CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
+            {
+                cs.Write(encryptedData, 16, encryptedData.Length - 16);
+                cs.FlushFinalBlock();
+                return ms.ToArray();
+            }
+        }
+    }
+
+    private byte[] DeriveKeyFromPassword(string password)
+    {
+        using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, Encoding.UTF8.GetBytes("somesalt"), 10000, HashAlgorithmName.SHA256))
+        {
+            return pbkdf2.GetBytes(32); // 32 bytes for AES-256
+        }
+    }
+
+
 }
 
