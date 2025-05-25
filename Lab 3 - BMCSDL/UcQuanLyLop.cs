@@ -14,7 +14,7 @@ namespace Lab_3___BMCSDL
     public partial class UcQuanLyLop : UserControl
     {
         private DataGridView dgvLop;
-        string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
+        string connectionString = @"Server=DESKTOP-P0BQAJD;Database=QLSVNhom;Trusted_Connection=True;";
 
         public UcQuanLyLop()
         {

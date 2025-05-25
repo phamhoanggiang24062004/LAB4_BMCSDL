@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,8 +19,9 @@ namespace Lab_3___BMCSDL
         private string mahp;
         private string manv;
         private string password;
-        private string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
+        private string connectionString = @"Server=DESKTOP-P0BQAJD;Database=QLSVNhom;Trusted_Connection=True;";
         private Button btnLuuDiem;
+        private readonly EmployeeKeyGenerator _keyGenerator;
 
         public FormNhapDiem(string malop, string tenlop, string mahp, string manv, string password)
         {
@@ -29,6 +31,7 @@ namespace Lab_3___BMCSDL
             this.mahp = mahp;
             this.manv = manv;
             this.password = password;
+            _keyGenerator = new EmployeeKeyGenerator();
             this.Text = $"Nhập điểm cho lớp: {malop} - {tenlop} - {mahp} của nhân viên {manv}";
             InitializeGrid();
             LoadSinhVienTheoLop();
@@ -84,21 +87,62 @@ namespace Lab_3___BMCSDL
                 DataTable dt = new DataTable();
                 adapter.Fill(dt);
 
-                if (!dt.Columns.Contains("DIEM_MOI"))
-                    dt.Columns.Add("DIEM_MOI", typeof(double)); // Thêm cột điểm nhập tay
+                // Thêm cột mới để hiển thị điểm đã giải mã
+                if (!dt.Columns.Contains("DIEM_GIAIMA"))
+                    dt.Columns.Add("DIEM_GIAIMA", typeof(int));
 
-                dgv.DataSource = dt;
-
-                foreach (DataGridViewColumn col in dgv.Columns)
+                // Giải mã điểm và gán vào cột DIEM_GIAIMA
+                foreach (DataRow row in dt.Rows)
                 {
-                    col.ReadOnly = col.Name != "DIEM_MOI";      // Chỉ cột điểm được nhập
+                    if (row["DIEMTHI"] != DBNull.Value)
+                    {
+                        try
+                        {
+                            byte[] encryptedDiem = (byte[])row["DIEMTHI"];
+                            using (RSA rsa = _keyGenerator.LoadPrivateKey(manv))
+                            {
+                                byte[] decryptedDiem = rsa.Decrypt(encryptedDiem, RSAEncryptionPadding.Pkcs1);
+                                int diem = BitConverter.ToInt32(decryptedDiem, 0);
+                                row["DIEM_GIAIMA"] = diem;
+                            }
+                        }
+                        catch
+                        {
+                            // Giải mã lỗi, để null
+                            row["DIEM_GIAIMA"] = DBNull.Value;
+                        }
+                    }
+                    else
+                    {
+                        row["DIEM_GIAIMA"] = DBNull.Value;
+                    }
                 }
 
+                // Xoá cột byte[] để tránh lỗi DataGridView khi hiển thị
+                dt.Columns.Remove("DIEMTHI");
+
+                // Thêm cột điểm mới nhập tay
+                if (!dt.Columns.Contains("DIEM_MOI"))
+                    dt.Columns.Add("DIEM_MOI", typeof(double));
+
+                // Gán dữ liệu vào DataGridView
+                dgv.DataSource = dt;
+
+                // Chỉ cho phép nhập điểm mới
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    col.ReadOnly = col.Name != "DIEM_MOI";
+                }
+
+                // Đổi tên tiêu đề cột
                 dgv.Columns["MASV"].HeaderText = "Mã SV";
                 dgv.Columns["HOTEN"].HeaderText = "Họ tên";
+                dgv.Columns["DIEM_GIAIMA"].HeaderText = "Điểm Thi";
                 dgv.Columns["DIEM_MOI"].HeaderText = "Điểm Mới";
             }
         }
+
+
 
         // --- Lưu điểm ---
         private void BtnLuuDiem_Click(object sender, EventArgs e)
@@ -120,12 +164,22 @@ namespace Lab_3___BMCSDL
                     int diem;
                     int.TryParse(diemObj.ToString(), out diem);
 
+
+                    // Mã hoá điểm thi
+                    byte[] encryptedDiem = null;
+                    using (RSA rsa = _keyGenerator.LoadPublicKey(manv))
+                    {
+                        byte[] diemBytes = BitConverter.GetBytes(diem);
+                        encryptedDiem = rsa.Encrypt(diemBytes, RSAEncryptionPadding.Pkcs1);
+                    }
+
+
                     // Gọi Stored Procedure SP_NHAPDIEM_SINHVIEN
                     using (SqlCommand cmd = new SqlCommand("SP_NHAPDIEM_SINHVIEN", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        cmd.Parameters.AddWithValue("@DIEM", diem);
+                        cmd.Parameters.AddWithValue("@ENC_DIEM", encryptedDiem);
                         cmd.Parameters.AddWithValue("@MASV", masv);
                         cmd.Parameters.AddWithValue("@MAHP", mahp);
                         cmd.Parameters.AddWithValue("@MANV", manv);

@@ -2,6 +2,7 @@
 using System.Text;
 using System.Security.Cryptography;
 using System.Data;
+using System.IO;
 
 namespace Lab_3___BMCSDL
 {
@@ -11,6 +12,7 @@ namespace Lab_3___BMCSDL
         private TextBox txtUsername;
         private TextBox txtPassword;
         private Button btnLogin;
+        private readonly EmployeeKeyGenerator _keyGenerator;
 
         public Form1()
         {
@@ -20,6 +22,7 @@ namespace Lab_3___BMCSDL
             this.AcceptButton = btnLogin;
             // Đăng ký sự kiện Resize cho Form
             this.Resize += MainForm_Resize;
+            _keyGenerator = new EmployeeKeyGenerator();
         }
 
         private void InitializeLoginForm()
@@ -29,7 +32,7 @@ namespace Lab_3___BMCSDL
             this.StartPosition = FormStartPosition.CenterScreen;
             this.ClientSize = new Size(800, 600);
             // Background sẽ thêm sau
-            this.BackgroundImage = Image.FromFile("C:\\Users\\PC\\Downloads\\microsoft-windows-3840x2160-12507.jpg");
+            this.BackgroundImage = Image.FromFile("D:\\NAM_3\\BMCSDL\\Lab 3 - BMCSDL\\Resources\\images.jpg");
             this.BackgroundImageLayout = ImageLayout.Stretch;
 
             //--- Tạo Panel bo góc chứa phần login ---
@@ -105,7 +108,7 @@ namespace Lab_3___BMCSDL
             byte[] hashedPassword = HashPasswordWithSHA1(pass);
 
             // Chuỗi kết nối đến cơ sở dữ liệu
-            string connectionString = @"Server=LAPTOP-RBM16H2U\MSSQLSER2022;Database=QLSVNhom;Trusted_Connection=True;";
+            string connectionString = @"Server=DESKTOP-P0BQAJD;Database=QLSVNhom;Trusted_Connection=True;";
 
             try
             {
@@ -133,14 +136,16 @@ namespace Lab_3___BMCSDL
 
                         if (!string.IsNullOrEmpty(manv))
                         {
-                            Dashboard dashboard = new Dashboard(manv, pass);
+
+                            Dashboard dashboard = new Dashboard(manv, pass, user);
                             this.Hide();
                             dashboard.ShowDialog();
                             this.Close();
                         }
-                        else if (user == "admin" && pass == "123")
+                        else if (user == "nv01")
                         {
-                            Dashboard dashboard = new Dashboard("NV01", pass);
+                           
+                            Dashboard dashboard = new Dashboard("NV01", pass, user);
                             this.Hide();
                             dashboard.ShowDialog();
                             this.Close();
@@ -180,7 +185,7 @@ namespace Lab_3___BMCSDL
         {
             using (SHA1 sha1 = SHA1.Create())
             {
-                byte[] passwordBytes = Encoding.Unicode.GetBytes(password);
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
                 return sha1.ComputeHash(passwordBytes);
             }
         }

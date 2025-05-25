@@ -49,8 +49,8 @@ namespace Lab_3___BMCSDL
             // --- Danh sách thành viên --- 
             string[] thanhVien = {
                 "MSSV 22120074 - Đỗ Nhật Duy",
-                "MSSV 221200** - Đỗ Văn Hải",
-                "MSSV 22120084 - Phạm Hoàng Giang"
+                "MSSV 22120084 - Phạm Hoàng Giang",
+                "MSSV 22120089 - Đỗ Xuân Hải"
             };
 
             foreach (var tv in thanhVien)
