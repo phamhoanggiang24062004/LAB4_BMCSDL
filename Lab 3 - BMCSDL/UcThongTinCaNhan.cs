@@ -177,7 +177,7 @@ namespace Lab_3___BMCSDL
         {
             try
             {
-                using (RSA rsa = _keyGenerator.LoadPrivateKey(_manv))
+                using (RSA rsa = _keyGenerator.LoadPrivateKey(_manv, _pass))
                 {
                     byte[] decryptedData = rsa.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
                     int salary = BitConverter.ToInt32(decryptedData, 0);

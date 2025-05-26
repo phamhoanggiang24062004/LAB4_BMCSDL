@@ -78,9 +78,7 @@ namespace Lab_3___BMCSDL
 
                 // Thêm tham số cho Stored Procedure
                 cmd.Parameters.AddWithValue("@MALOP", malop);
-                cmd.Parameters.AddWithValue("@MANV", manv);
                 cmd.Parameters.AddWithValue("@MAHP", mahp);
-                cmd.Parameters.AddWithValue("@MK", password);
 
                 // Lấy dữ liệu ra DataTable
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd);
@@ -99,7 +97,7 @@ namespace Lab_3___BMCSDL
                         try
                         {
                             byte[] encryptedDiem = (byte[])row["DIEMTHI"];
-                            using (RSA rsa = _keyGenerator.LoadPrivateKey(manv))
+                            using (RSA rsa = _keyGenerator.LoadPrivateKey(manv, password))
                             {
                                 byte[] decryptedDiem = rsa.Decrypt(encryptedDiem, RSAEncryptionPadding.Pkcs1);
                                 int diem = BitConverter.ToInt32(decryptedDiem, 0);
@@ -182,7 +180,6 @@ namespace Lab_3___BMCSDL
                         cmd.Parameters.AddWithValue("@ENC_DIEM", encryptedDiem);
                         cmd.Parameters.AddWithValue("@MASV", masv);
                         cmd.Parameters.AddWithValue("@MAHP", mahp);
-                        cmd.Parameters.AddWithValue("@MANV", manv);
 
                         cmd.ExecuteNonQuery();                  // Thực thi stored procedure
                     }
